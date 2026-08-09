@@ -870,6 +870,11 @@ export class ColumnsService implements IColumnsService {
   ): Promise<Model | Column<any>> {
     const reuse = param.reuse || {};
     const column = await Column.get(context, { colId: param.columnId });
+
+    if (!column) {
+      NcError.get(context).fieldNotFound(param.columnId);
+    }
+
     const oldColumn = deepClone(column);
 
     let createdBackup: ColumnBackupRef | undefined;
