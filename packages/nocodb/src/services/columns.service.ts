@@ -3698,12 +3698,15 @@ export class ColumnsService implements IColumnsService {
     param: { columnId: string; req: NcRequest },
   ) {
     const oldColumn = await Column.get(context, { colId: param.columnId });
-    const oldPrimaryColumn = await Model.get(context, oldColumn.fk_model_id)
-      .then((model) => model.getColumns(context))
-      .then((columns) => columns.find((c) => c.pv));
+
     if (!oldColumn) {
       NcError.get(context).fieldNotFound(param.columnId);
     }
+
+    const oldModel = await Model.get(context, oldColumn.fk_model_id);
+    const oldPrimaryColumn = oldModel
+      ? (await oldModel.getColumns(context)).find((c) => c.pv)
+      : undefined;
 
     // LongText (and its richMode / smartMode / ai variants) is rejected as a
     // display value — multi-line / markdown content renders poorly in
